@@ -171,7 +171,7 @@ public:
 		this->curle_b = vector<Phaser>(Nh, zero);
 
 		//parameters
-		double phase = 0.0, k = 120, c = 3.0e8, epsi = 8.854187817e-12, miu = 4 * 3.14159265358979*1e-7, ita = sqrt(epsi / miu);
+		double phase = 0.0, k = 1.0, c = 3.0e8, epsi = 8.854187817e-12, miu = 4 * 3.14159265358979*1e-7, ita = sqrt(epsi / miu);
 		double Ax = 100;
 		double Ay = 100;
 		double Az = 100;

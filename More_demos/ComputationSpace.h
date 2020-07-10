@@ -154,7 +154,7 @@ namespace Computationspace {
 			err_out.open("err_out.txt");
 			sampleline.open("sampleline.txt");
 			tetra_sample.open("tetra_sample.txt");
-			long watch_point = 132+26460;//this->domain.edgespaceindex_to_edgeindex(Brick_system::x, Brick_system::spaceindex(5, 5, 5, Brick_system::x), this->domain.setting.Nx, this->domain.setting.Ny, this->domain.setting.Nz);
+			long watch_point = 132;//this->domain.edgespaceindex_to_edgeindex(Brick_system::x, Brick_system::spaceindex(5, 5, 5, Brick_system::x), this->domain.setting.Nx, this->domain.setting.Ny, this->domain.setting.Nz);
 			///////////////   real time_marching  /////////////////////
 			this->set_E(0 * deltat);
 			this->set_H(0.5*deltat);
