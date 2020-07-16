@@ -265,8 +265,8 @@ namespace Tetra_system {
 
 		bool check_if_point_on_segment(V3d p0, V3d p1, V3d p2) {
 			double bar = 1e-15;
-			double dif = (norm(p0 - p1) + norm(p0 - p2)) - norm(p1 - p2);
-			if (abs(dif) < bar * norm(p1 - p2)) {
+			double ratio = (norm(p0 - p1) + norm(p0 - p2)) / norm(p1 - p2);
+			if (abs(ratio - 1.0) < bar ) {
 				return true;
 			}
 			else {
@@ -284,9 +284,9 @@ namespace Tetra_system {
 			double area1 = 0.5 * norm(V3dcross(v1, v2));
 			double area2 = 0.5 * norm(V3dcross(v1, v3));
 			double area3 = 0.5 * norm(V3dcross(v2, v3));
-			double dif = (area1 + area2 + area3) - area;
+			double ratio = (area1 + area2 + area3) / area;
 			double bar = 1e-15;
-			if (abs(dif) < bar * area) {
+			if (abs(ratio - 1.0) < bar ) {
 				return true;
 			}
 			else {
@@ -320,9 +320,11 @@ namespace Tetra_system {
 			V3d p2 = { geo.plist[geo.tetrahedral_list[tetra_id].vertices[1]].x,geo.plist[geo.tetrahedral_list[tetra_id].vertices[1]].y,geo.plist[geo.tetrahedral_list[tetra_id].vertices[1]].z };
 			V3d p3 = { geo.plist[geo.tetrahedral_list[tetra_id].vertices[2]].x,geo.plist[geo.tetrahedral_list[tetra_id].vertices[2]].y,geo.plist[geo.tetrahedral_list[tetra_id].vertices[2]].z };
 			V3d p4 = { geo.plist[geo.tetrahedral_list[tetra_id].vertices[3]].x,geo.plist[geo.tetrahedral_list[tetra_id].vertices[3]].y,geo.plist[geo.tetrahedral_list[tetra_id].vertices[3]].z };
+			/*
 			if (this->check_if_p_on_tetra_surface(p0, p1, p2, p3, p4)) {
 				return true;
 			}
+			*/
 			double bar = 1e-15;
 			V3d v1 = p2 - p1, v2 = p3 - p1, v3 = p4 - p1, vp = p0 - p1;
 			V3d vx = matrix3d_solve(v1, v2, v3, vp);

@@ -100,6 +100,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
+      <OpenMPSupport>true</OpenMPSupport>
+      <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -130,6 +132,7 @@
     <ClInclude Include="LinearAlgebra.h" />
     <ClInclude Include="SparseVector.h" />
     <ClInclude Include="Tetra_system.h" />
+    <ClInclude Include="UnionDomain.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="basefuncs.cpp" />

@@ -109,6 +109,7 @@ namespace Computationspace {
 
 		void update_E(double deltat, double time) {
 			double epsi0 = 8.854187817e-12;
+#pragma omp parallel for 
 			for (long i = 0; i < this->Evector.size(); i++) {
 				Parameter para = this->domain.get_Eparas(i);
 				if (this->Etags[i].shader == BOUNDARY) {
@@ -124,6 +125,7 @@ namespace Computationspace {
 
 		void update_H(double deltat, double time) {
 			double miu = 4 * 3.14159265358979*1e-7;
+#pragma omp parallel for 
 			for (long i = 0; i < this->Hvector.size(); i++) {
 				Parameter para = this->domain.get_Hparas(i);
 				if (this->Htags[i].shader == BOUNDARY) {

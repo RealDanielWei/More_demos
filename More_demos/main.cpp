@@ -1,8 +1,8 @@
-#include "Tetra_system.h"
+#include "UnionDomain.h"
 #include "ComputationSpace.h"
 
 double fshape(double t) {
-	double tao = 1.2e-8, t0 = 4 * tao;
+	double tao = 2*1.2e-8, t0 = 4 * tao;
 	return (t - t0) * exp(-((t - t0) * (t - t0)) / (tao * tao));
 }
 
@@ -25,8 +25,25 @@ double ana_field(double time, V3d position, V3d direction, Field_type field_mark
 }
 
 int main() {
-	Tetra_system::Tetra_domain tdomain("nodes_cube.txt", "elements_cube.txt");
+	
+	UnionDomain::RealizedUnionDomain unidomain= UnionDomain::RealizedUnionDomain();
+	unidomain.add_tdomain("nodes_scatter.txt", "elements_scatter.txt", V3d{ 0.0,0.0,0.0 });
+	unidomain.add_pml_bg(5, 5, 5, 5);
+	unidomain.realize();
+	
 	/*
+	cout << "output Sh...Ne=" << unidomain.get_Ne() << endl;
+	unidomain.output_Sh();
+	cout << "output Se...Nh=" << unidomain.get_Nh() << endl;
+	unidomain.output_Se();
+	Test_data_set testdata(unidomain);
+	testdata.output();
+	*/
+	Computationspace::ComputationSpace cs(unidomain, ana_field);
+	cs.time_march(2.5e-11, 1000000);
+	/*
+	Tetra_system::Tetra_domain tdomain("nodes_scatter.txt", "elements_scatter.txt");
+	
 	cout << "output Sh...Ne=" << tdomain.get_Ne() << endl;
 	tdomain.output_Sh();
 	cout << "output Se...Nh=" << tdomain.get_Nh() << endl;
@@ -34,7 +51,9 @@ int main() {
 	Test_data_set testdata(tdomain);
 	testdata.output();
 	*/
+	/*
 	Computationspace::ComputationSpace cs(tdomain, ana_field);
-	cs.time_march(4e-11, 10000);
+	cs.time_march(4e-11, 100000);
+	*/
 	system("pause");
 }

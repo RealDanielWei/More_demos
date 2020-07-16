@@ -8,7 +8,7 @@ typedef std::complex<double> Phaser;
 typedef std::numeric_limits< double > dbl;
 
 enum Shader {
-	BOUNDARY, NOT_BOUNDARY, INTERFACE
+	BOUNDARY, NOT_BOUNDARY, INTERFACE, DISABLED
 };
 
 enum Field_type {

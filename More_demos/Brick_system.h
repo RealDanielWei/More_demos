@@ -35,6 +35,7 @@ namespace Brick_system {
 		void set() {
 			{
 				//set x centers
+				this->x_base_list = vector<double>(this->Nx + 1);
 				this->x_base_list[0] = 0.0;
 				for (long i = 1; i < this->Nx + 1; i++) {
 					this->x_base_list[i] = this->x_base_list[i - 1] + this->delta_x_list[i - 1];
@@ -42,6 +43,7 @@ namespace Brick_system {
 			}
 			{
 				//set y centers
+				this->y_base_list = vector<double>(this->Ny + 1);
 				this->y_base_list[0] = 0.0;
 				for (long i = 1; i < this->Ny + 1; i++) {
 					this->y_base_list[i] = this->y_base_list[i - 1] + this->delta_y_list[i - 1];
@@ -49,6 +51,7 @@ namespace Brick_system {
 			}
 			{
 				//set z centers
+				this->z_base_list = vector<double>(this->Nz + 1);
 				this->z_base_list[0] = 0.0;
 				for (long i = 1; i < this->Nz + 1; i++) {
 					this->z_base_list[i] = this->z_base_list[i - 1] + this->delta_z_list[i - 1];
@@ -416,6 +419,29 @@ namespace Brick_system {
 			cout << "Brick Domain Finished!: Ne=" << this->Ne << " Nh=" << this->Nh << endl;
 		}
 
+		double get_edge_length(long eid) {
+			spaceindex sp = this->edgeindex_to_edgespaceindex(eid, this->setting.Nx, this->setting.Ny, this->setting.Nz);
+			V3d edge_direction = this->brick_dir_to_V3d(sp.di);
+			V3d edge_start = V3d{ this->setting.x_base_list[sp.nx],this->setting.y_base_list[sp.ny],this->setting.z_base_list[sp.nz] };
+			double edge_length = 1.0;
+			switch (sp.di)
+			{
+			case Brick_system::x:
+				edge_length = this->setting.delta_x_list[sp.nx];
+				break;
+			case Brick_system::y:
+				edge_length = this->setting.delta_y_list[sp.ny];
+				break;
+			case Brick_system::z:
+				edge_length = this->setting.delta_z_list[sp.nz];
+				break;
+			default:
+				cout << "Brick_Domain::get_edge_length: invalid direction!" << endl;
+				break;
+			}
+			return edge_length;
+		}
+
 		long get_patch_id_by_spaceindex(Direction dir, long nx, long ny, long nz) {
 			return this->pathchspaceindex_to_patchindex(dir, spaceindex(nx, ny, nz, dir), this->setting.Nx, this->setting.Ny, this->setting.Nz);
 		}
@@ -516,6 +542,129 @@ namespace Brick_system {
 			}
 			
 			return sv;
+		}
+
+		bool check_if_h_interpolation_in_brick_valid(long idx, long idy, long idz, vector<Shader>& h_shader_list) {
+			//check in x
+			{
+				Shader shader_011 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx, idy, idz)];
+				Shader shader_001 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx, idy - 1, idz)];
+				Shader shader_010 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx, idy, idz - 1)];
+				Shader shader_000 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx, idy - 1, idz - 1)];
+				Shader shader_111 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx + 1, idy, idz)];
+				Shader shader_101 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx + 1, idy - 1, idz)];
+				Shader shader_110 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx + 1, idy, idz - 1)];
+				Shader shader_100 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::yz, idx + 1, idy - 1, idz - 1)];
+				bool cond1 = shader_011 == DISABLED || shader_011 == INTERFACE;
+				bool cond2 = shader_001 == DISABLED || shader_001 == INTERFACE;
+				bool cond3 = shader_010 == DISABLED || shader_010 == INTERFACE;
+				bool cond4 = shader_000 == DISABLED || shader_000 == INTERFACE;
+				bool cond5 = shader_111 == DISABLED || shader_111 == INTERFACE;
+				bool cond6 = shader_101 == DISABLED || shader_101 == INTERFACE;
+				bool cond7 = shader_110 == DISABLED || shader_110 == INTERFACE;
+				bool cond8 = shader_100 == DISABLED || shader_100 == INTERFACE;
+				if (cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8) {
+					return false;
+				}
+			}
+			//check in y
+			{
+				Shader shader_011 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx, idy, idz)];
+				Shader shader_001 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx, idy, idz - 1)];
+				Shader shader_010 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx - 1, idy, idz)];
+				Shader shader_000 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx - 1, idy, idz - 1)];
+				Shader shader_111 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx, idy + 1, idz)];
+				Shader shader_101 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx, idy + 1, idz - 1)];
+				Shader shader_110 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx - 1, idy + 1, idz)];
+				Shader shader_100 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::zx, idx - 1, idy + 1, idz - 1)];
+				bool cond1 = shader_011 == DISABLED || shader_011 == INTERFACE;
+				bool cond2 = shader_001 == DISABLED || shader_001 == INTERFACE;
+				bool cond3 = shader_010 == DISABLED || shader_010 == INTERFACE;
+				bool cond4 = shader_000 == DISABLED || shader_000 == INTERFACE;
+				bool cond5 = shader_111 == DISABLED || shader_111 == INTERFACE;
+				bool cond6 = shader_101 == DISABLED || shader_101 == INTERFACE;
+				bool cond7 = shader_110 == DISABLED || shader_110 == INTERFACE;
+				bool cond8 = shader_100 == DISABLED || shader_100 == INTERFACE;
+				if (cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8) {
+					return false;
+				}
+			}
+			//check in z
+			{
+				Shader shader_011 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx, idy, idz)];
+				Shader shader_001 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx - 1, idy, idz)];
+				Shader shader_010 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx, idy - 1, idz)];
+				Shader shader_000 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx - 1, idy - 1, idz)];
+				Shader shader_111 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx, idy, idz + 1)];
+				Shader shader_101 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx - 1, idy, idz + 1)];
+				Shader shader_110 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx, idy - 1, idz + 1)];
+				Shader shader_100 = h_shader_list[this->get_patch_id_by_spaceindex(Brick_system::xy, idx - 1, idy - 1, idz + 1)];
+				bool cond1 = shader_011 == DISABLED || shader_011 == INTERFACE;
+				bool cond2 = shader_001 == DISABLED || shader_001 == INTERFACE;
+				bool cond3 = shader_010 == DISABLED || shader_010 == INTERFACE;
+				bool cond4 = shader_000 == DISABLED || shader_000 == INTERFACE;
+				bool cond5 = shader_111 == DISABLED || shader_111 == INTERFACE;
+				bool cond6 = shader_101 == DISABLED || shader_101 == INTERFACE;
+				bool cond7 = shader_110 == DISABLED || shader_110 == INTERFACE;
+				bool cond8 = shader_100 == DISABLED || shader_100 == INTERFACE;
+				if (cond1 || cond2 || cond3 || cond4 || cond5 || cond6 || cond7 || cond8) {
+					return false;
+				}
+			}
+			return true;
+		}
+
+		bool move_h_interpolation_brick_if_needed(long& idx, long& idy, long& idz, vector<Shader>& h_shader_list) {
+			if (this->check_if_h_interpolation_in_brick_valid(idx, idy, idz, h_shader_list)) {
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx, idy + 1, idz, h_shader_list)) {
+				idy = idy + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx, idy, idz + 1, h_shader_list)) {
+				idz = idz + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx, idy + 1, idz + 1, h_shader_list)) {
+				idy = idy + 1;
+				idz = idz + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx + 1, idy, idz, h_shader_list)) {
+				idx = idx + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx + 1, idy + 1, idz, h_shader_list)) {
+				idx = idx + 1;
+				idy = idy + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx + 1, idy, idz + 1, h_shader_list)) {
+				idx = idx + 1;
+				idz = idz + 1;
+				return true;
+			}
+			if (this->check_if_h_interpolation_in_brick_valid(idx + 1, idy + 1, idz + 1, h_shader_list)) {
+				idx = idx + 1;
+				idy = idy + 1;
+				idz = idz + 1;
+				return true;
+			}
+			return false;
+		}
+
+		SparseVec get_general_h_expansion(V3d position, V3d direction, vector<Shader>& h_shader_list) {
+			Brick_system::spaceindex sp = this->setting.get_which_brick_it_falls_into(position);
+			long idx = sp.nx;
+			long idy = sp.ny;
+			long idz = sp.nz;
+			if (this->move_h_interpolation_brick_if_needed(idx, idy, idz, h_shader_list)) {
+				return this->get_h_expansion(Brick_system::spaceindex(idx, idy, idz, Brick_system::null), position, direction);
+			}
+			else {
+				cout << "Brick_Domain::get_general_h_expansion: No useful brick" << endl;
+			}
 		}
 	};
 }
